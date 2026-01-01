@@ -1,6 +1,6 @@
 { lib
 , stdenv
-, fetchFromGitHub
+, fetchFromGitea
 , cmake
 , coreutils
 , llvmPackages_21
@@ -17,7 +17,8 @@ stdenv.mkDerivation (finalAttrs: {
   pname = "zig";
   inherit (release) version;
 
-  src = fetchFromGitHub {
+  src = fetchFromGitea {
+    domain = "codeberg.org";
     owner = "ziglang";
     repo = "zig";
     rev = release.src.rev;
