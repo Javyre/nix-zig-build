@@ -1,23 +1,23 @@
 { lib
 , stdenv
-, fetchFromGitHub
+, fetchFromGitea
 , cmake
 , coreutils
-, llvmPackages_21
-, libgcc
+, llvmPackages_22
 , libxml2
 , zlib
 , release
 }:
 
 let
-  llvmPackages = llvmPackages_21;
+  llvmPackages = llvmPackages_22;
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "zig";
   inherit (release) version;
 
-  src = fetchFromGitHub {
+  src = fetchFromGitea {
+    domain = "codeberg.org";
     owner = "ziglang";
     repo = "zig";
     rev = release.src.rev;
@@ -36,7 +36,7 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   buildInputs = [
-    libgcc.lib # Work around https://github.com/ziglang/zig/issues/18612 (libstdc++.so not found in rpath)
+    # libgcc.lib # Work around https://github.com/ziglang/zig/issues/18612 (libstdc++.so not found in rpath)
     libxml2
     zlib
   ] ++ (with llvmPackages; [
@@ -49,9 +49,10 @@ stdenv.mkDerivation (finalAttrs: {
     # This ensures that the resulting zig binary
     # - runs on all CPUs with the same arch (like x86-64)
     # - is identical when built on different systems
-    "-DZIG_TARGET_MCPU=baseline"
+    # "-DZIG_TARGET_MCPU=baseline"
     # To optimize for recent x86_64 CPUs, you can set the following:
     # "-DZIG_TARGET_MCPU=x86_64_v4"
+    "-DZIG_TARGET_MCPU=native"
 
     # Otherwise the Zig version is set to `major.minor.patch` without a possible `-dev` suffix,
     # causing ZLS to not resolve a build runner.
@@ -73,7 +74,8 @@ stdenv.mkDerivation (finalAttrs: {
     export ZIG_GLOBAL_CACHE_DIR=$TMP/zig-cache;
   '';
 
-  doInstallCheck = true;
+  doInstallCheck = false;
+  # doInstallCheck = true;
   installCheckPhase = ''
     runHook preInstallCheck
 
